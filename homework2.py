@@ -66,6 +66,13 @@ def apply_image_filters(frame):
     return filtered_image
 
 
+def states_change(curent_state, states):
+    for state in states:
+        states[state] = False
+    states[curent_state] = True
+    return states
+
+
 width_cam, height_cam = 1280, 720
 cap = cv2.VideoCapture(0)
 cap.set(3, width_cam)
@@ -102,19 +109,19 @@ while True:
         center_x, center_y = (hand_box[0] + hand_box[2]) // 2, (hand_box[1] + hand_box[3]) // 2
 
         if total_rised_fingers == 1:
-            states = {"drawing": True, "rubbing": False, "color_change": False}
+            states = states_change('drawing', states)
 
         elif total_rised_fingers == 3:
             previous_x, previous_y = None, None
-            states = {"drawing": False, "rubbing": True, "color_change": False}
+            states = states_change('rubbing', states)
 
         elif total_rised_fingers == 5 and (states["drawing"] or states["rubbing"]):
             previous_x, previous_y = None, None
-            states = {"drawing": False, "rubbing": False, "color_change": True}
+            states = states_change('color_change', states)
 
         else:
             previous_x, previous_y = None, None
-            states = {"drawing": False, "rubbing": False, "color_change": False}
+            states = states_change('None', states)
 
         if states["drawing"]:
             cv2.circle(drawn_frame, (center_x, center_y), 5, color, -1)
